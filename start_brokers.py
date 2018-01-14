@@ -24,8 +24,9 @@ def get_slurm_allocated_nodes():
 def configure_kafka():
     master = socket.gethostname().split(".")[0]
     nodes = get_slurm_allocated_nodes() 
-    spark_nodes = len(nodes) - broker_count
-    b_nodes = nodes[spark_nodes:spark_nodes+broker_count] 
+    # 1st node is spark master and zookeeper instance
+    b_nodes = nodes[1:1+broker_count]   
+    print 'Brokers: %s' % b_nodes
 
     for idx, node in enumerate(b_nodes):
         path = os.path.join(apath, "broker-%d"%idx)
@@ -48,7 +49,6 @@ def start_brokers(broker_nodes):
         start_command = "ssh " + node.strip() + " " + kafka_home_full + "/bin/kafka-server-start.sh" + \
                                         " -daemon " + cur_dir + '/' + path 
         logging.info("Execute: %s"%start_command)
-        print start_command
         os.system(start_command)
     
 
